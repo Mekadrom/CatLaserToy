@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d7d7184b-00ad-4880-8c61-9b0b6fa5c450" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/higgs/draw/Draw.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/higgs/draw/Draw.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/higgs/draw/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/higgs/draw/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../mechlab8.ino" beforeDir="false" afterPath="$PROJECT_DIR$/../mechlab8.ino" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
