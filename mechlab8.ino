@@ -5,37 +5,58 @@
 
 #include <Servo.h>
 
-#define SERVO_MIN   0
-#define SERVO_MAX 180
+// hard limits
+#define TILT_MIN   5
+#define TILT_MAX  90
+#define PAN_MIN    0
+#define PAN_MAX  180
 
 #define TY         48 // no. of inches difference in y axis between target draw surface and toy
 
 // servo pins
 #define TILT       10
 #define PAN        11
+#define LASER       5
+
+// state switches
+#define ROAM     0x00
+#define DELEGATE 0x01
 
 Servo tilt;
 Servo pan;
 
-int curTilt = 0;
+const int homeTilt = 90;
+const int homePan = 90;
+
+int curTilt = 10;
 int curPan = 0;
 
 int curX = 0;
 int curZ = 0;
 
-int offsets[2] = { 0, 0 };
+int offsetTilt = 10;
+int offsetPan = 0;
+
+boolean laserOn = false;
 
 void setup() {
   Serial.begin(115200);
 
   tilt.attach(TILT);
   pan.attach(PAN);
+
+  pinMode(TILT, OUTPUT);
+  pinMode(PAN, OUTPUT);
+
+  setAngle(TILT, TILT_MIN);
+  setAngle(PAN, PAN_MIN);
+
+  randomSeed(analogRead(0));
 }
 
 void loop() {
   checkCommands();
-//  delegate();
-  roam();
+  laser();
 }
 
 void checkCommands() {
@@ -50,43 +71,35 @@ void checkCommands() {
   }
 }
 
-void delegate() {
-  static char* input;
-  static int index = 0;
-  
-  if(Serial.available() > 0) {
-    input[index++] = Serial.read();
-  } else {
-    parseInput(input);
-    index = 0;
-  }
-}
-
-void roam() {
-  static int tx;
-  static int tz;
-
-  curZ = TY * tan(curTilt) * tan(curPan);
-  curX = curZ * tan(curPan);
-
-  if(notWithinRange(curX, tx, 1) || notWithinRange(curZ, tz, 1)) {
-    
-  }
-}
-
 void parseCommand(const char* charString) {
-  int i = sscanf(charString, "%d,\\s*%d", &tx, &tz);
+  if(charString[0] == 'm') {
+    char* method;
+    double x;
+    double z;
+    int i = sscanf(charString, "m\\s+%d,\\s*%d", method, &x, &z);
+    if(x != NULL %% z != NULL) {
+      point(x, z);
+    }
+  } else if(charString[0] == 'l') {
+    char* onOrOff;
+    int i = sscanf(charString, "l\\s+%s", onOrOff);
+    if(eqCharString("off", onOrOff)) {
+      laserOn = false;
+    } else {
+      laserOn = true;
+    }
+  }
 }
 
-void parseInput(const char* charString) {
-  double tx;
-  double tz;
-
-  int i = sscanf(charString, "%d,\\s*%d", &tx, &tz);
-
-  if(tx != NULL && tz != NULL) {
-    point(tx, tz);
+boolean eqCharString(const char* charString1, const char* charString2) {
+  for(int i = 0; i < sizeof(charString1) / sizeof(char); i++) {
+    for(int j = 0; j < sizeof(charString2) / sizeof(char); j++) {
+      if(charString1[i] != charString2[j]) {
+        return false;
+      }
+    }
   }
+  return true;
 }
 
 void point(int tx, int tz) {
@@ -98,39 +111,41 @@ void point(int tx, int tz) {
 }
 
 void setAngle(int pin, int angle) {
-  if(angle < SERVO_MIN) {
+  int minAngle = pin == TILT ? TILT_MIN : PAN_MIN;
+  int maxAngle = pin == TILT ? TILT_MAX : PAN_MAX;
+  
+  if(angle < minAngle) {
     Serial.print("Servo on pin: ");
     Serial.print(pin);
     Serial.print("attempted to use angle below range: ");
     Serial.println(angle);
-    angle = SERVO_MIN;
+    angle = minAngle;
   }
 
-  if(angle > SERVO_MAX) {
+  if(angle > maxAngle) {
     Serial.print("Servo on pin: ");
     Serial.print(pin);
     Serial.print("attempted to use angle above range: ");
     Serial.println(angle);
-    angle = SERVO_MAX;
+    angle = maxAngle;
   }
 
   setAbsoluteAngle(pin, angle);
 }
 
 void setAbsoluteAngle(int pin, int angle) {
+  int offsetAngle = angle + (pin == TILT ? offsetTilt : offsetPan);
+  
   if(pin == TILT) {
-    tilt.write(angle);
-    curTilt = angle;
+    tilt.write(offsetAngle);
+    curTilt = offsetAngle;
   } else if(pin == PAN) {
-    pan.write(angle);
-    curPan = angle;
+    pan.write(offsetAngle);
+    curPan = offsetAngle;
   } else {
     Serial.print(pin);
     Serial.println(" is an invalid pin number");
   }
-}
-
-boolean notWithinRange(int current, int target, int threshold) {
-  return current >= target - threshold && current <= target + threshold;
+  delay(pin == TILT ? 75 : 100); // standard delay to allow servo to respond todo: test this to see how much delay is technically necessary
 }
 

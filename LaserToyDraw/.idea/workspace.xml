@@ -2,16 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d7d7184b-00ad-4880-8c61-9b0b6fa5c450" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/batik-rasterizer-1.11.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/batik-slideshow-1.11.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/batik-squiggle-1.11.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/batik-svgpp-1.11.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/batik-ttf2svg-1.11.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/batik.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/batik.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/batik-bin-1.11.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/higgs/draw/io/BufferedImageTranscoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/higgs/draw/io/BufferedImageTranscoder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/higgs/draw/Draw.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/higgs/draw/Draw.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/higgs/draw/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/higgs/draw/Utils.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -77,6 +70,9 @@
     <property name="settings.editor.selected.configurable" value="reference.settingsdialog.project.gradle" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.higgs.draw" />
+    </key>
     <key name="CreateClassDialog.RecentsKey">
       <recent name="com.higgs.draw.io" />
     </key>
@@ -148,7 +144,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
