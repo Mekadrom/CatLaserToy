@@ -151,7 +151,7 @@ void initCircle() {
     i++;
   }
 
-  *circleShape = Shape(points, (int)(360.0 / (double)bezier));
+  circleShape = &Shape(points, (int)(360.0 / (double)bezier));
 }
 
 void loop() {
