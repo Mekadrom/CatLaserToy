@@ -27,7 +27,7 @@
 #define INCREASE_BUTTON_PIN      8
 
 #define NUM_SHAPES               4
-#define NUM_OPTIONS              2
+#define NUM_OPTIONS              4
 
 Servo tilt;
 Servo pan;
@@ -45,7 +45,7 @@ int curX = 0;
 int curZ = 0;
 
 int offsetTilt = 0;
-int offsetPan = -5;
+int offsetPan = 0; //-5
 
 int tiltMaxDelay = 175;
 int panMaxDelay = 350;
@@ -69,6 +69,8 @@ int optionIndex = 0;
 
 int TY = 30; // no. of inches difference in y axis between target draw surface and toy
 long shapeSpeedDelay = 1000;
+double s = 5;
+double inc = 3;
 
 struct Point {
   double x;
@@ -159,9 +161,7 @@ void loop() {
 
   led();
   
-  if(roam) {
-    randomPoint(shapeSpeedDelay);
-  } else if(critter) {
+  if(critter) {
     critterRoam(shapeSpeedDelay / 5);
   } else {
     drawShape(*curShape, shapeSpeedDelay);
@@ -191,7 +191,7 @@ void randomPoint(long d) {
   double rx = floor(abs(random() - random()) * (1 + maxX - minX) + minX);
   double rz = floor(abs(random() - random()) * (1 + maxZ - minZ) + minZ);
   
-  pointAtPoint(rx, rz);
+  pointAtPoint(rx, rz, 0);
   sleep(d);
 }
 
@@ -203,7 +203,7 @@ void critterRoam(long d) {
   double tz = random(minZ, maxZ);
 
 //  pointAtPoint(curX + vx, curZ + vz);
-  pointAtPoint(tx, tz);
+  pointAtPoint(tx, tz, 100);
 
   sleep(d);
 }
@@ -211,38 +211,23 @@ void critterRoam(long d) {
 void drawShape(struct Shape shape, long d) {
   for(int i = 0; i< shape.numPoints; i++) {
     Point p = shape.points[i];
-    pointAtPoint(p.x, p.z);
+    pointAtPoint(p.x, p.z, 0);
     sleep(d);
   }
 }
 
-void pointAtPoint(double tx, double tz) {
-  Serial.print("(");
-  Serial.print(curX);
-  Serial.print(", ");
-  Serial.print(curZ);
-  Serial.println(")");
-  
+void pointAtPoint(double tx, double tz, long interpol) {
   double thetaTilt = 90.0 - (atan(tx / TY) * (180.0 / PI));
   double thetaPan = 90.0 + (atan(tz / tx) * (180.0 / PI));
 
-//  double interpol = 1.0;
-//
-//  while(curTilt != thetaTilt || curPan != thetaPan) {
-//    if(curTilt < thetaTilt) {
-//      setAngle(TILT, curTilt + interpol);
-//    } else if(curTilt > thetaTilt) {
-//      setAngle(TILT, curTilt - interpol);
-//    }
-//    if(curPan < thetaPan) {
-//      setAngle(PAN, curPan - interpol);
-//    } else if(curPan > thetaPan) {
-//      setAngle(PAN, curPan + interpol);
-//    }
-//  }
+  while(!withinRange(curTilt, thetaTilt, s) && !withinRange(curPan, thetaPan, s)) {
+    setAngle(TILT, curTilt + (curTilt > thetaTilt ? -inc : inc));
+    setAngle(PAN, curPan + (curPan > thetaPan ? -inc : inc));
+  }
+}
 
-  setAngle(TILT, thetaTilt);
-  setAngle(PAN, thetaPan);
+boolean withinRange(double i, double target, double range) {
+  return (i > target - range) && (i <= target + range);
 }
 
 void setAngle(int pin, double angle) {
@@ -250,18 +235,10 @@ void setAngle(int pin, double angle) {
   int maxAngle = pin == TILT ? TILT_MAX : PAN_MAX;
 
   if(angle < minAngle) {
-    Serial.print("Servo on pin: ");
-    Serial.print(pin);
-    Serial.print(" attempted to use angle below range: ");
-    Serial.println(angle);
     angle = minAngle;
   }
 
   if(angle > maxAngle) {
-    Serial.print("Servo on pin: ");
-    Serial.print(pin);
-    Serial.print(" attempted to use angle above range: ");
-    Serial.println(angle);
     angle = maxAngle;
   }
 
@@ -280,9 +257,6 @@ void setAbsoluteAngle(int pin, double angle) {
     pan.write(offsetAngle);
     previousAngle = curPan;
     curPan = offsetAngle;
-  } else {
-    Serial.print(pin);
-    Serial.println(" is an invalid pin number");
   }
 
   curX = TY * tan((90.0 - curTilt) * (PI / 180.0));
@@ -326,8 +300,6 @@ void input() {
 }
 
 void shapeSelect() {
-  Serial.println("incrementing shape index");
-  
   if(shapeIndex + 1 >= NUM_SHAPES) {
     shapeIndex = 0;
   } else {
@@ -365,8 +337,6 @@ void shapeSelect() {
 }
 
 void optionSelect() {
-  Serial.println("incrementing option index");
-  
   if(optionIndex + 1 >= NUM_OPTIONS) {
     optionIndex = 0;
   } else {
@@ -375,41 +345,43 @@ void optionSelect() {
 }
 
 void decreaseCurOption() {
-  Serial.print("decrementing current option (");
-  Serial.print(optionIndex == 0 ? "ty" : "shapeSpeedDelay");
-  Serial.println(")");
-  
   switch(optionIndex) {
-    case 1: {
-      if(TY - 1 > 0) TY--;
-      break;
-    }
     case 0: {
       if(shapeSpeedDelay - 100 > 0) shapeSpeedDelay -= 100;
       break;
     }
-    default: {
-      // wat (do nothing)
+    case 1: {
+      if(TY - 1 > 0) TY--;
+      break;
+    }
+    case 2: {
+      if(s - 1 >= 0) s--;
+      break;
+    }
+    case 3: {
+      if(inc - 1> 0) inc--;
+      break;
     }
   }
 }
 
 void increaseCurOption() {
-  Serial.print("incrementing current option (");
-  Serial.print(optionIndex == 0 ? "ty" : "shapeSpeedDelay");
-  Serial.println(")");
-  
   switch(optionIndex) {
-    case 1: {
-      TY++;
-      break;
-    }
     case 0: {
       shapeSpeedDelay += 100;
       break;
     }
-    default: {
-      // wat (do nothing)
+    case 1: {
+      TY++;
+      break;
+    }
+    case 2: {
+      s++;
+      break;
+    }
+    case 3: {
+      inc++;
+      break;
     }
   }
 }
