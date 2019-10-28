@@ -21,8 +21,11 @@
 #define TILT                    10
 #define PAN                     11
 
-#define NUM_SHAPES               4
-#define NUM_OPTIONS              4
+#define HEIGHT_PIN              A0
+#define SPEED_PIN               A1
+
+#define MIN_DELAY              100
+#define MAX_DELAY             2100
 
 Servo tilt;
 Servo pan;
@@ -84,7 +87,7 @@ void setup() {
 
 void loop() {
   laser();
-
+  input();
   if(laserOn) {
     critterRoam(shapeSpeedDelay / 5);
   }
@@ -92,7 +95,7 @@ void loop() {
 
 void laser() {
   double r = random(0, 100);
-  if(r < 6.125) {
+  if(r < 3) {
     laserOn = false;
   } else {
     laserOn = true;
@@ -106,6 +109,11 @@ void laser() {
   }
 }
 
+void input() {
+  TY = map(analogRead(HEIGHT_PIN), 0, 1024, 1, 72);
+  shapeSpeedDelay = map(analogRead(SPEED_PIN), 0, 1024, MIN_DELAY, MAX_DELAY);
+}
+
 void critterRoam(long d) {
   double vx = random(10) - 5;
   double vz = random(10) - 5;
@@ -113,7 +121,7 @@ void critterRoam(long d) {
   double tx = random(minX, maxX);
   double tz = random(minZ, maxZ);
 
-  pointAtPoint(tx, tz, 100);
+  pointAtPoint(tx, tz, map(shapeSpeedDelay, MIN_DELAY, MAX_DELAY, 10, 350));
 
   sleep(d);
 }
