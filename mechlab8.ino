@@ -166,6 +166,7 @@ boolean withinRange(double i, double target, double range) {
  * method used for checking servo angles to make sure they're within hard limits
  */
 void setAngle(int pin, double angle) {
+  // these two line decide between the tilt min/max and the pan min/max
   int minAngle = pin == TILT ? TILT_MIN : PAN_MIN;
   int maxAngle = pin == TILT ? TILT_MAX : PAN_MAX;
 
@@ -189,8 +190,8 @@ void setAbsoluteAngle(int pin, double angle) {
 
   if(pin == TILT) {
     tilt.write(offsetAngle);
-    previousAngle = curTilt;
-    curTilt = offsetAngle;
+    previousAngle = curTilt; // store previous angles for delay calculation
+    curTilt = offsetAngle; // store current angles for tracking current position
   } else if (pin == PAN) {
     pan.write(offsetAngle);
     previousAngle = curPan;
@@ -212,6 +213,10 @@ void setAbsoluteAngle(int pin, double angle) {
 /**
  * returns roughly the number of milliseconds to delay to wait for the servo
  * to get to its new angle
+ * 
+ * i experimented and found the min and max delays required to allow the servo 
+ * to reach its angle; this maps the angle difference to between the min and 
+ * max wait time
  */
 long getDelay(int pin, int angleDiff) {
   if (pin == TILT) {
@@ -220,4 +225,3 @@ long getDelay(int pin, int angleDiff) {
     return map(abs(angleDiff), 0, PAN_MAX - PAN_MIN, 10, panMaxDelay);
   }
 }
-
